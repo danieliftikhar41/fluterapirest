@@ -62,7 +62,7 @@ class ApiService {
         showToast(jsondata["message"]);
         await prefs.setBool('login', true);
         print(jsondata["id"]);
-        await prefs.setString('id', jsondata["id"]);
+        await prefs.setInt('id', jsondata["id"]);
         isLogin = true;
       }
     } else {
@@ -70,6 +70,47 @@ class ApiService {
       isLogin = false;
     }
     return isLogin;
+  }
+
+  Future<bool> addFav(String date, String explanation, String title, String url,
+      String copyright) async {
+    bool login = true;
+    final prefs = await SharedPreferences.getInstance();
+    int? id = await prefs.getInt('id');
+    String idUser = "";
+    if (id != null) {
+      idUser = id.toString();
+    }
+    var url = "http://www.sundarabcn.com/flutter/addData.php";
+
+    var response = await http.post(Uri.parse(url), headers: {
+      'Accept': 'application/json'
+    }, body: {
+      'idUser': idUser,
+      'date': date,
+      'explanation': explanation,
+      'title': title,
+      'url': url,
+      'copyright': copyright,
+    });
+    print(response.statusCode);
+    if (response.statusCode == 200) {
+      var jsondata = json.decode(response.body);
+      print(jsondata);
+      if (jsondata["error"] == 1) {
+        showToast(jsondata["message"]);
+        login = false;
+      } else if (jsondata["success"] == 1) {
+        showToast(jsondata["message"]);
+
+        login = true;
+      }
+    } else {
+      showToast("Error de connexió");
+      login = false;
+    }
+
+    return login;
   }
 
   showToast(String message) {

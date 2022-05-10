@@ -8,6 +8,7 @@ import 'package:apirest/ApiService/ApiService.dart';
 import 'package:http/http.dart' as http;
 import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class MainScreen extends StatelessWidget {
   MainScreen({Key? key}) : super(key: key);
@@ -46,8 +47,15 @@ class MyHomePage extends StatefulWidget {
   State<MyHomePage> createState() => _MyHomePageState();
 }
 
+Future<String?> getUserId() async {
+  final prefs = await SharedPreferences.getInstance();
+  final String? id = prefs.getString('id');
+  return id;
+}
+
 class _MyHomePageState extends State<MyHomePage> {
   GlobalKey<FormState> formKey = GlobalKey<FormState>();
+  Future<String?> idUser = getUserId();
 
   @override
   Widget build(BuildContext context) {
@@ -85,12 +93,26 @@ class _MyHomePageState extends State<MyHomePage> {
                     mainAxisAlignment: MainAxisAlignment.start,
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        widget.snapshot.data!.title,
-                        style: TextStyle(
-                          fontWeight: FontWeight.w500,
-                          fontSize: 20,
-                        ),
+                      Row(
+                        children: [
+                          Text(
+                            widget.snapshot.data!.title,
+                            style: TextStyle(
+                              fontWeight: FontWeight.w500,
+                              fontSize: 20,
+                            ),
+                          ),
+                          IconButton(
+                              onPressed: () => {
+                                    apiService.addFav(
+                                        widget.snapshot.data!.date,
+                                        widget.snapshot.data!.explanation,
+                                        widget.snapshot.data!.title,
+                                        widget.snapshot.data!.url,
+                                        widget.snapshot.data!.copyright)
+                                  },
+                              icon: Icon(Icons.favorite_outline))
+                        ],
                       ),
                       Padding(
                         padding: const EdgeInsets.only(top: 10.0),
